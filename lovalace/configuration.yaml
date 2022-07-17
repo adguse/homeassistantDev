@@ -1,0 +1,32 @@
+homeassistant:
+  customize: !include customize.yaml
+
+automation: !include_dir_merge_list automation
+#cloud:
+counter:
+config:
+frontend:
+  themes: !include_dir_merge_named themes/
+input_boolean:
+input_select:
+input_text:
+input_datetime:
+input_number:
+ios:
+logbook:
+logger: !include logger.yaml
+lovelace: !include lovelace.yaml
+lovelace_gen:
+media_player: !include media_player.yaml
+media_source:
+mobile_app:
+my:
+#person: 
+#recorder: !include recorder.yaml
+script: !include_dir_merge_named scripts/
+sun:
+switch: !include switch.yaml
+system_health:
+template: !include_dir_merge_list template
+timer:
+# weather: !include weather.yaml

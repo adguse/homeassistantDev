@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="copyright" content="Copyright 2015 Sony Corporation">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="default.css" rel="stylesheet" type="text/css">
+    <title>remote</title>
+    <script type="text/javascript">
+
+        var ua = navigator.userAgent.toLowerCase();
+        if ((ua.indexOf('iphone') > 0)
+            || (ua.indexOf('ipad') > 0)
+            || (ua.indexOf('android') > 0)
+            || (ua.indexOf('windows phone') > 0)) {
+            document.write('<link href="remote_mobile.css" rel="stylesheet" type="text/css">');
+        } else {
+            document.write('<link href="remote_pc.css" rel="stylesheet" type="text/css">');
+        }
+
+    </script>
+    <script type="text/javascript" src="common.js"></script>
+    <script type="text/javascript" src="json2.js"></script>
+    <script type="text/javascript" src="xmlhttprequestsupport.js"></script>
+    <script type="text/javascript" src="remote.js"></script>
+</head>
+
+<body class="main" onload="onLoad()">
+    <h1 class="level1">Remote Control</h1>
+    <form name="remote" action="#">
+        <p></p>
+        <table class="remote">
+            <tr align="center">
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.hdmiout">HDMI OUTPUT</td>
+                <td colspan=3 class="green_td" onclick="changeSettings(this)" id="GUI.power.zone2">ZONE2 POWER</td>
+                <td colspan=3 class="green_td" onclick="changeSettings(this)" id="GUI.power.zone3">ZONE3 POWER</td>
+                <td colspan=3 class="green_td" onclick="changeSettings(this)" id="GUI.power.main">MAIN POWER</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="gray_td" onclick="changeSettings(this)"
+                    onmouseover="this.style.backgroundColor='#ccc'" onmouseout="this.style.backgroundColor='#808080'"
+                    onmousedown="this.style.backgroundColor='#FF3A61'" id="target.zone2">ZONE2</td>
+                <td colspan=4 class="gray_td" onclick="changeSettings(this)"
+                    onmouseover="this.style.backgroundColor='#ccc'" onmouseout="this.style.backgroundColor='#808080'"
+                    onmousedown="this.style.backgroundColor='#FF3A61'" id="target.zone3">ZONE3</td>
+                <td colspan=4 class="gray_td" onclick="changeSettings(this)"
+                    onmouseover="this.style.backgroundColor='#ccc'" onmouseout="this.style.backgroundColor='#808080'"
+                    onmousedown="this.style.backgroundColor='#FF3A61'" id="target.main">MAIN</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.bddvd">BD/DVD</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.sat">SAT/CATV</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.game">GAME</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.stb">STB</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.video">VIDEO</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.aux">AUX</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.tv">TV</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.sacd">SA-CD/CD</td>
+                <td colspan=4 class="white_td" onclick="changeSettings(this)" id="GUI.tuner">TUNER</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.soundoptimizer">SOUND OPTIMIZER
+                </td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.puredirect">PURE DIRECT</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.inceilingspmode">IN-CEILING SP
+                </td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.display">DISPLAY</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.up">↑</td>
+                <td colspan=4></td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.left">←</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.enter">ENTER</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.right">→</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.return">RETURN</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.down">↓</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.optionmenu">OPTION</td>
+            </tr>
+            <tr align="center">
+                <td colspan=4></td>
+                <td colspan=4 class="blue_td" onclick="changeSettings(this)" id="GUI.home">HOME</td>
+                <td colspan=4></td>
+            </tr>
+            <tr align="center">
+                <td colspan=8 class="untouchable sidelines" style="color:white"><span>TEST</span></td>
+                <td colspan=4></td>
+            </tr>
+            <tr align="center">
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.testpicture">PICTURE</td>
+                <td colspan=4 class="black_td" onclick="changeSettings(this)" id="GUI.testtone">TONE</td>
+                <td colspan=4></td>
+            </tr>
+            <tr align="center">
+                <td colspan=12 class="untouchable sidelines" style="color:white"><span>SOUND FIELD</span></td>
+            </tr>
+            <tr align="center">
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.2chadirect">2CH/DIRECT</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.afd">A.F.D.</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.movie">MOVIE</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.multistereo">MULTI ST.</td>
+            </tr>
+            <tr align="center">
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.tunerautoup">＋</td>
+                <td colspan=6></td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.tunerpreup">＋</td>
+            </tr>
+            <tr align="center">
+                <td colspan=3 class="untouchable" style="color:white">TUNING</td>
+                <td colspan=6></td>
+                <td colspan=3 class="untouchable" style="color:white">PRESET</td>
+            </tr>
+            <tr align="center">
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.tunerautodown">－</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.fm">FM</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.am">AM</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.tunerpredown">－</td>
+            </tr>
+            <tr align="center">
+                <td colspan=3></td>
+                <td colspan=3 class="untouchable" style="color:white">VOLUME</td>
+                <td colspan=3 class="untouchable" style="color:white">INPUT</td>
+                <td colspan=3></td>
+            </tr>
+            <tr align="center">
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.muting">MUTING</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.volumeup">＋</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.inputup">＋</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.inputmode">INPUT MODE</td>
+            </tr>
+            <tr align="center">
+                <td colspan=3></td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.volumedown">－</td>
+                <td colspan=3 class="black_td" onclick="changeSettings(this)" id="GUI.inputdown">－</td>
+                <td colspan=3></td>
+            </tr>
+        </table>
+    </form>
+    <hr> Copyright 2015 Sony Corporation
+</body>
+
+</html>

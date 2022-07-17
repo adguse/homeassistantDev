@@ -1,0 +1,12 @@
+default: warning
+logs:
+  requests.packages.urllib3.connectionpool: critical
+  frontend.js.latest: critical
+  py.warnings: critical
+  homeassistant.components.analytics: info
+filters:
+  homeassistant.components.automation:
+  - "Already running$"
+  homeassistant.components.script:
+  - "Already running$"
+    

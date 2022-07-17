@@ -1,0 +1,125 @@
+* {
+    font-family: calibri, verdana, arial, helvetica, sans-serif
+}
+
+body.header {
+    background-color: #171717;
+    color: #fff
+}
+
+body.main {
+    min-width: 600px
+}
+
+body.maininput {
+    min-width: 1500px
+}
+
+div.headertitle {
+    font-size: 2.4em;
+    padding-left: 32px;
+    color: #fff
+}
+
+div.headerversion,
+div.headerdestination {
+    color: #fff;
+    padding-left: 32px
+}
+
+body.menu {
+    background-color: #ccc;
+    color: #fff
+}
+
+.menulist {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+
+.menulist li a {
+    display: block;
+    background-color: #ccc;
+    padding-top: .5em;
+    padding-left: 2em;
+    padding-bottom: .5em;
+    text-decoration: none;
+    text-align: left;
+    font-size: 16px;
+    color: #fff;
+    border-style: none;
+    margin: 0
+}
+
+.menulist li a.on:hover,
+.menulist li a.off:hover {
+    background-color: #eee;
+    color: #222;
+    border-style: none
+}
+
+.menulist li a.on:active {
+    color: #eee;
+    background-color: #222;
+    border-style: none
+}
+
+.menulist li a.off:active {
+    color: #eee;
+    background-color: #606060;
+    border-style: none
+}
+
+.menulist li a.on {
+    color: #fff;
+    background-color: #999
+}
+
+.level1 {
+    background: #e5e5e5;
+    margin: -15px -10px;
+    padding: 15px 10px
+}
+
+.level2 {
+    border-left: 7px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    padding: .2em 0 0 .2em
+}
+
+.level3 {
+    border-left: 12px solid #ccc;
+    padding: 0 0 0 .2em
+}
+
+.level4 {
+    border-bottom: 1px solid #ccc;
+    padding: .2em 0 0 .2em
+}
+
+th {
+    text-align: left
+}
+
+.touchable {
+    cursor: hand
+}
+
+.lattice {
+    border-spacing: 0;
+    border-collapse: collapse
+}
+
+.lattice th,
+.lattice td {
+    border: 1px solid #ccc
+}
+
+.restricted {
+    ime-mode: disabled
+}
+
+.testtonebtn {
+    min-width: 9em
+}

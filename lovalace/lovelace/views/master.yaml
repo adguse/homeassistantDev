@@ -1,0 +1,831 @@
+# # lovelace_gen
+
+# # ====================================
+# # Generate entities yaml.
+# #
+# # regex pattern for auto generation `<entities>(.|\n)*?</entities>`
+# #
+# # {{ '{%- set entities = {' }}
+# # {%- set filter = ['weather','automation','zwave','persistent_notification','remote','zone','input_number','input_select','person'] %}
+# # {%- for s in states | rejectattr('domain','in', filter) %}
+# # {%- set icon = None if s.attributes.device_class is defined else s.attributes.icon if s.attributes.icon is defined else None %}
+# # {%- set output = { "name":s.name, "icon":icon } %}
+# # {{ '  "{}": {{'.format(s.entity_id) }}
+# # {%- for k, v in output.items() %}
+# # {%- set sv = '"{}"'.format(v) if v is string else v %}
+# # {{ '    "{}": {}'.format(k, sv) }}{{ ',' if not loop.last else ' },' }}
+# # {%- endfor %}
+# # {%- endfor %}
+# # {{ '} %}' }}
+# #
+# # ====================================
+# #
+# # These macros create a base based off groups (if they are already created)
+# #
+# # {%- macro attr(indent, name, value, quotes=False, comma=True) %}
+# # {%- set value = "'{}'".format(value) if quotes else value %}
+# # {%- set comma = ',' if comma else '' %}
+# # {{- "{}'{}': {}{}".format(indent*' ', name, value, comma) }}
+# # {%- endmacro %}
+
+# # {%- macro formatlist(indent, name, inlist, quotes=False, comma=True) %}
+# # {%- set comma = ',' if comma else '' %}
+# # {{- attr(indent, name, '[', comma=False) }}
+# # {%- for item in inlist %}
+# # {%- set item = "'{}'".format(item) if quotes else item %}
+# # {{ '{}{},'.format((indent+2) * ' ', item) }}
+# # {%- endfor %}
+# # {{ "{}]{}".format(indent*' ', comma) }}
+# # {%- endmacro %}
+
+# # {%- macro createbase(name, list_of_groups) %}
+# # {{ '{{%- set {} = ['.format(name) }}
+# # {%- for group in list_of_groups %}
+# # {%- set domain, object_id = group.split('.') %}
+# # {%- set state = states[domain][object_id] %}
+# # {%- if loop.first %}
+# # {{ '  {' }}
+# # {%- else %}
+# # {{ '  },{' }}
+# # {%- endif %}
+# # {{ attr(4, 'name', state.name, True) }}
+# # {{ attr(4, 'icon', state.attributes.icon, True) }}
+# # {{ attr(4, 'image', '', True) }}
+# # {{ formatlist(4, 'entities', state.attributes.entity_id, True) }}
+# # {%- if loop.last %}
+# # {{ '}] %}' }}
+# # {%- endif %}
+# # {%- endfor %}
+# # {%- endmacro %}
+
+# # I Created the following macros because I was running into issues
+# #   lines being truncated when passing via includes.  I believe the max
+# #   line limit is 1024, but i didn't bother looking further because that
+# #   was the only possible issue.
+# # 
+# # After creating these macros, the front end started again when passing very large objects
+# #   inside included files.
+
+# {%- macro buildmapping(indent, items, iterfunc) %}
+# {%- for attr, value in items.items() %}
+# {%- set line = indent ~ '- ' if loop.first else indent ~ '  ' %}
+# {%- if value is iterable and value is not string and value is not mapping %}
+# {{ line }}{{ attr }}:
+# {{- iterfunc(indent ~ '  ', value) }}
+# {%- elif value is mapping %}
+# {{ line }}{{ attr }}:
+# {{- buildmapping(indent+'  ', value, iterfunc) }}
+# {%- elif value %}
+# {{ line }}{{ attr }}: {{ value }}
+# {%- endif %}
+# {%- endfor %}
+# {%- endmacro %}
+
+# {%- macro builditerable(indent, values) %}
+# {%- for value in values %}
+# {%- if value is iterable and value is not string and value is not mapping %}
+# {{ indent ~ '- ' }}
+# {{- builditerable(indent+'  ', value) }}
+# {%- elif value is mapping %}
+# {{- buildmapping(indent, value, builditerable) }}
+# {%- elif value %}
+# {{ indent  ~ '- ' }}{{ value }}
+# {%- endif %}
+# {%- endfor %}
+# {%- endmacro %}
+
+# {%- macro toyaml(indent, attr, value, first=False) %}
+# {%- set line = indent[:-2] ~ '- ' if first else indent %}
+# {%- if value is iterable and value is not string and value is not mapping %}
+# {%- if attr %}{{- line }}{{ attr }}:{%- endif %}
+# {{- builditerable(indent, value) }}
+# {%- elif value is mapping %}
+# {%- if attr %}{{- line }}{{ attr }}:{%- endif %}
+# {{- buildmapping(indent, value, builditerable) }}
+# {%- elif value %}
+# {{- line }}{{ attr }}: {{ value }}
+# {%- endif %}
+# {%- endmacro %}
+
+# {%- set areas = [
+#   {
+#     'name': 'Basement',
+#     'icon': 'mdi:home-floor-b',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.basement_stairs',
+#       'switch.basement_cans',
+#       'sensor.basement_temperature',
+#       'sensor.basement_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Bonus Room',
+#     'icon': 'mdi:bed-king',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.bonus_room_entrance',
+#       'light.bonus_room_bedroom_fixture',
+#       'fan.bonus_room_bedroom',
+#       'light.bonus_room_bedroom_recessed',
+#       'sensor.bonus_room_temperature',
+#       'sensor.bonus_room_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Deck',
+#     'icon': 'fapro:tan',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       "light.deck",
+#       "fan.deck_fan_1",
+#       "fan.deck_fan_2",
+#       "switch.deck_walkway",
+#       "switch.deck_mood_lighting",
+#       "light.deck_wled_1",
+#       "light.deck_wled_2",
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Dining Room',
+#     'icon': 'mdi:silverware-fork-knife',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.dining_room_chandelier',
+#       'switch.dining_room_hutch',
+#       'sensor.sliding_door_temperature',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Foyer',
+#     'icon': 'mdi:door',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', },  
+#     ],
+#     'entities': [
+#       'switch.foyer',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Game Room',
+#     'icon': 'mdi:gamepad-square',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.game_room_switch',
+#       'switch.game_room_buffet_outlet',
+#       'switch.game_room_bookcase_outlet',
+#       'switch.game_room_window',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Garage',
+#     'icon': 'mdi:home-floor-g',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.garage_cans',
+#       'switch.garage_workbench',
+#       'switch.garage_ceiling_outlet',
+#       'sensor.garage_temperature',
+#       'sensor.garage_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Garage Entrance',
+#     'icon': 'mdi:door',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.garage_entry',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Hall',
+#     'icon': 'mdi:home-floor-2',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.hallway',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Kitchen',
+#     'icon': 'mdi:pasta',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.kitchen_island',
+#       'light.kitchen_cans',
+#       'switch.kitchen_cabinet',
+#       'switch.kitchen_pantry',
+#       'switch.lzw45_mood_lighting',
+#       'switch.kitchen_outlet_above_fridge',
+#       'switch.kitchen_outlet_above_microwave',
+#       'sensor.kitchen_temperature',
+#       'sensor.kitchen_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Laundry Room',
+#     'icon': 'mdi:washing-machine',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.laundry',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Living Room',
+#     'icon': 'mdi:sofa',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', },  
+#     ],
+#     'entities': [
+#       'light.living_room',
+#       'switch.living_room_window',
+#       'climate.living_room_thermostat',
+#       'sensor.living_room_temperature',
+#       'sensor.living_room_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Master Bathroom',
+#     'icon': 'mdi:paper-roll',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.master_bathroom_sink',
+#       'light.master_bathroom_cans',
+#       'switch.master_bathroom_fan',
+#       'sensor.master_bathroom_temperature',
+#       'sensor.master_bathroom_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Master Bedroom',
+#     'icon': 'mdi:bed-king',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'fan.master_fixture',
+#       'light.master_closet',
+#       'light.master_fixture',
+#       'switch.master_nightstand_left',
+#       'switch.master_nightstand_right',
+#       'sensor.master_bedroom_temperature',
+#       'sensor.master_bedroom_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Office',
+#     'icon': 'mdi:desk',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'light.bonus_room_office_fixture',
+#       'fan.bonus_room_office',
+#       'light.bonus_room_office_recessed',
+#       'sensor.office_temperature',
+#       'sensor.office_humidity',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Outside',
+#     'icon': 'mdi:tree',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       'switch.outside_porch',
+#       'switch.passenger_sconce',
+#       'switch.sconces_garage',
+#       'switch.sconces_main_entrance',
+#       'switch.sliding_door_sconce',
+#       'switch.flood_light',
+#       'spacer',
+#       'spacer',
+#       'spacer',
+#       'light.main_door_left_bulb',
+#       'light.main_door_right_bulb',
+#       'light.passenger_door_bulb',
+#       'light.garage_sconce_left_bulb',
+#       'light.garage_sconce_right_bulb',
+#       'sensor.outside_temperature',
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Patio',
+#     'icon': 'fapro:patio',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       "switch.patio_string_light",
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   },{
+#     'name': 'Porch',
+#     'icon': 'fapro:porch',
+#     'image': '',
+#     'header': [ 
+#       { 'type': '../templates/headers/navigator.yaml', }, 
+#     ],
+#     'entities': [
+#       "switch.outside_porch",
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#     'display': [
+#       {'domain': ['light'], 'state': ['on'], 'icon': 'mdi:lightbulb-multiple', 'units': 'lights' },
+#       {'domain': ['switch'], 'state': ['on'], 'icon': 'mdi:light-switch', 'units': 'switches' },
+#       {'domain': ['fan'], 'state': ['on'], 'icon': 'mdi:fan', 'units': 'fans' },
+#     ],
+#   }] %}
+
+# {%- set systems = [
+#   {
+#     'name': 'Speed Test',
+#     'icon': 'mdi:speedometer',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.speedtest_download',
+#       'sensor.speedtest_upload',
+#       'sensor.speedtest_ping',
+#     ],
+#   },{
+#     'name': 'Intel Nuc',
+#     'image': '/local/images/devices/nuc_5.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.last_boot',
+#       'sensor.memory_use_percent',
+#       'sensor.processor_use',
+#       'sensor.cpu_temperature',
+#       'sensor.memory_use',
+#       'sensor.memory_use_total',
+#       'sensor.disk_use_percent_home',
+#       'sensor.disk_use_total',
+#       'sensor.disk_use_home',
+#       'device_tracker.intel_nuc',
+#     ],
+#   },{
+#     'name': 'HomeAssistant',
+#     'image': '/local/images/devices/home-assistant-logo.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'triggers_update': 'all',
+#     'entities': [
+#       'sensor.uptime',
+#       'sensor.current_version',
+#       'sensor.entity_counter_zwave',
+#       'sensor.entity_counter_sensor',
+#       'sensor.entity_counter_light',
+#       'sensor.entity_counter_automation',
+#       'sensor.entity_counter_binary_sensor',
+#       'sensor.entity_counter_camera',
+#       'sensor.entity_counter_cover',
+#       'sensor.entity_counter_device_tracker',
+#       'sensor.entity_counter_fan',
+#       'sensor.entity_counter_group',
+#       'sensor.entity_counter_media_player',
+#       'sensor.entity_counter_person',
+#       'sensor.entity_counter_script',
+#       'sensor.entity_counter_switch',
+#       'sensor.entity_counter_zone',
+#     ],
+#   },{
+#     'name': 'sensor.ups_model',
+#     'image': '/local/images/devices/BR1500G_1.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.ups_status',
+#       'sensor.ups_load',
+#       'sensor.ups_input_voltage',
+#       'sensor.ups_battery_charge',
+#       'sensor.ups_battery_runtime',
+#       'sensor.ups_battery_voltage',
+#     ],
+#   },{
+#     'name': 'Synology',
+#     'image': '/local/images/devices/synology_ds216j.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.synology_uptime',
+#       'sensor.synology_volume_used_volume_1',
+#       'sensor.synology_memory_usage_real',
+#       'sensor.synology_cpu_load_total',
+#       'sensor.synology_used_space_volume_1',
+#       'sensor.synology_total_size_volume_1',
+#       'sensor.synology_average_disk_temp_volume_1',
+#       'sensor.synology_network_down',
+#       'sensor.synology_network_up',
+#       'device_tracker.synology_ds216j',
+#     ],
+#   },{
+#     'name': 'Gateway Pro',
+#     'image': '/local/images/devices/unifi_gateway_pro.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.server_room_gateway_uptime',
+#       'device_tracker.server_room_gateway_pro',
+#     ],
+#   },{
+#     'name': 'Server Room Switch',
+#     'image': '/local/images/devices/unifi_16port_switch_2.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.server_room_temperature',
+#       'sensor.server_room_humidity',
+#       'sensor.server_room_switch_uptime',
+#       'sensor.server_room_switch_temperature',
+#       'device_tracker.server_room_16_port_poe_switch',
+#       'sensor.bonus_server_room_temperature',
+#       'sensor.bonus_server_room_humidity',
+#     ],
+#   },{
+#     'name': 'Bonus Room Switch',
+#     'image': '/local/images/devices/unifi_16port_switch_2.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.bonus_room_switch_uptime',
+#       'sensor.bonus_room_switch_temperature',
+#       'device_tracker.bonus_room_16_port_poe_switch',
+#     ],
+#   },{
+#     'name': 'Server Room AC-Lite',
+#     'image': '/local/images/devices/unifi_aclite.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.server_room_ac_lite_uptime',
+#       'device_tracker.server_room_ac_lite',
+#     ],
+#   },{
+#     'name': 'Hall Closet AC-Lite',
+#     'image': '/local/images/devices/unifi_aclite.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.hall_closet_ac_lite_uptime',
+#       'device_tracker.hall_closet_ac_lite',
+#     ],
+#   },{
+#     'name': 'Garage AC-Lite',
+#     'image': '/local/images/devices/unifi_aclite.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'sensor.garage_ac_lite_uptime',
+#       'device_tracker.garage_ac_lite',
+#     ],
+#   },{
+#     'name': 'Cloud Key',
+#     'image': '/local/images/devices/unifi_cloud_key_gen1.png',
+#     'type': '../templates/summary/device.yaml',
+#     'header': [  { 'type': '../templates/headers/navigator.yaml', }, ],
+#     'entities': [
+#       'device_tracker.unifi_cloudkey',
+#     ],
+#   }
+# ] %}
+
+# {%- set doors = [
+#   {
+#     'entity': 'binary_sensor.main_door',
+#     'name': 'Main',
+#     'last_opened': 'sensor.main_door_last_opened',
+#     'type': '../templates/buttons/door.yaml',
+#     'door_type': 'door',
+#   },{
+#     'entity': 'binary_sensor.garage_entry_door',
+#     'name': 'Entry',
+#     'last_opened': 'sensor.garage_entry_door_last_opened',
+#     'type': '../templates/buttons/door.yaml',
+#     'door_type': 'door',
+#   },{
+#     'entity': 'binary_sensor.sliding_door',
+#     'name': 'Patio',
+#     'last_opened': 'sensor.sliding_door_last_opened',
+#     'type': '../templates/buttons/door.yaml',
+#     'door_type': 'door',
+#   },{
+#     'entity': 'binary_sensor.garage_door_tilt',
+#     'name': 'Garage',
+#     'last_opened': 'sensor.garage_door_tilt_last_opened',
+#     'type': '../templates/buttons/door.yaml',
+#     'cover': 'cover.garage_door',
+#     'door_type': 'garage',
+#   },{
+#     'entity': 'binary_sensor.rear_garage_door_tilt',
+#     'name': 'Garage',
+#     'last_opened': 'sensor.rear_garage_door_tilt_last_opened',
+#     'type': '../templates/buttons/door.yaml',
+#     'cover': 'cover.rear_garage_door',
+#     'door_type': 'garage',
+#   }
+# ] %}
+
+# {%- set cameras = [
+#   {'entity': 'camera.driveway'},
+#   {'entity': 'camera.backyard'},
+#   {'entity': 'camera.foyer'},
+#   {'entity': 'camera.garage'},
+#   {'entity': 'camera.kitchen'},
+#   {'entity': 'camera.floating'},
+# ] %}
+
+# {%- set echos = [
+#   {
+#     'entity': 'script.alexa_say_living_room', 
+#     'icon': 'mdi:sofa', 
+#     'name': 'Living Room'
+#   },{
+#     'entity': 'script.alexa_say_master', 
+#     'icon': 'mdi:bed-king', 
+#     'name': 'Master'
+#   },{
+#     'entity': 'script.alexa_say_bonus_room', 
+#     'icon': 'mdi:bed-king', 
+#     'name': 'Bonus Room'
+#   },{
+#     'entity': 'script.alexa_say_all', 
+#     'icon': 'mdi:bullhorn', 
+#     'name': 'All'
+#   },{
+#     'entity': 'script.clear_alexa_text', 
+#     'icon': 'mdi:close', 
+#     'name': 'Clear'
+#   },
+# ] %}
+
+# {%- set holidays = [
+#   {
+#     'entity': 'switch.kitchen_outlet_above_microwave',
+#     'icon': 'mdi:home-group', 
+#     'name': 'Holiday Houses'
+#   },{
+#     'entity': 'switch.living_room_window',
+#     'icon': 'mdi:pine-tree', 
+#     'name': 'Christmas Tree'
+#   },{
+#     'entity': 'switch.game_room_window',
+#     'icon': 'mdi:pine-tree', 
+#     'name': 'Large Window Tree'
+#   },{
+#     'entity': 'switch.double_plug_left',
+#     'icon': 'fas:holly-berry', 
+#     'name': 'Hutch Lights'
+#   },{
+#     'entity': 'switch.floating_double_plug_left',
+#     'icon': 'mdi:pine-tree', 
+#     'name': 'Small Window Tree'
+#   },
+# ]%}
+
+# {% set batteries = [
+#   {
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.basement_battery_level',
+#     'name': 'Basement Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.bonus_room_battery_level',
+#     'name': 'Bonus Room Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.bonus_server_room_temperature_sensor_battery_level',
+#     'name': 'Bonus Server Room Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.cgdk2_1_battery_level',
+#     'name': 'Test Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'binary_sensor.garage_door_battery',
+#     'name': 'Garage Door Tilt Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'binary_sensor.garage_entrance_battery',
+#     'name': 'Garage Door Entrance Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.garage_temperature_sensor_battery_level',
+#     'name': 'Garage Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.kitchen_temperature_sensor_battery_level',
+#     'name': 'Kitchen Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'binary_sensor.main_entrance_battery',
+#     'name': 'Main Door Entrance Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.master_bathroom_temperature_sensor_battery_level',
+#     'name': 'Master Bathroom Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.master_bedroom_temperature_sensor_battery_level',
+#     'name': 'Master Bedroom Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'binary_sensor.rear_garage_door_battery',
+#     'name': 'Rear Garage Door Tilt Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'sensor.server_room_battery_level',
+#     'name': 'Server Room Sensor',
+#   },{
+#     'type':  '../templates/buttons/battery.yaml',
+#     'entity': 'binary_sensor.sliding_door_battery',
+#     'name': 'Sliding Door Entrance Sensor',
+#   },
+# ]%}
+
+# {%- set main_buttons = [
+#   {
+#     'name': 'Remote',
+#     'icon': 'mdi:remote-tv',
+#     'image': '/local/images/remote_2.png',
+#     'view': 'remote.yaml',
+#     'triggers_update': [ 'media_player.sony_bravia_tv', 'media_player.sony_bravia_tv_zone2' ],
+#     'display': [
+#       {'domain': ['media_player'], 'state': ['on', 'playing'], 'icon': 'mdi:speaker-wireless', 'units': 'zones' },
+#     ],
+#     'type': '../templates/summary/overview.yaml',
+#   },
+# ] %}
+
+
+# # {%- set testing = true %}
+
+# # Set up the home page.
+# - !include
+#   - dynamic_view_builder.yaml
+#   - name: Home
+#     icon: mdi:home
+#     visible: true
+#     header:
+#     - type: '../templates/headers/main.yaml'
+# {{ toyaml('    ', 'entities', main_buttons) }}
+
+# # Dynamically create all the main views.
+# {%- for view in main_buttons %}
+# {%- set attrs = view.items() | list %}
+# {%- set view = attrs | selectattr('0','eq','view') | first %}
+# {%- set attrs = attrs | rejectattr('0', 'in', ['view', 'image', 'type', 'triggers_update', 'display']) | list %}
+# - !include
+# {%- if view is defined %}
+#   - {{ view[1] }}
+# {%- else %}
+#   - dynamic_view_builder.yaml
+# {%- endif %}
+# {%- for attr, value in attrs %}
+# {{ toyaml('    ', attr, value, loop.first) }}
+# {%- endfor %}
+# {%- endfor %}
+
+# # Dynamically create all sub views.
+
+# {%- for main_view in main_buttons %}
+#   {%- for subview in main_view.entities if main_view.entities is defined %}
+# - !include
+#   - dynamic_view_builder.yaml
+#     {%- set attrs = subview.items() | list %}
+#     {%- set attrs = attrs | rejectattr('0', 'in', ['view', 'type']) | list %}
+#     {%- set attrs = attrs + [('back_path', main_view.name.lower().replace(' ', '_'))] %}
+#     {%- for attr, value in attrs %}
+# {{ toyaml('    ', attr, value, loop.first) }}
+#     {%- endfor %}
+#   {%- endfor %}
+# {%- endfor %}
+
+# # Create the remote settings view
+- !include remote.yaml
+# - !include remote_settings.yaml

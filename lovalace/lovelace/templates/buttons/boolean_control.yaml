@@ -1,0 +1,90 @@
+# lovelace_gen
+
+{%- set name = name | default(none) %}
+{%- set domain = entity.split('.')[0] %}
+
+type: custom:button-card
+entity: {{ entity }}
+color: auto
+{%- if icon is defined %}
+icon: {{ icon }}
+{%- endif %}
+show_icon: true
+{%- if domain not in ['script'] %}
+show_state: true
+{%- endif %}
+show_name: true
+name: |
+  [[[
+    return ({{'true' if name is none else 'false'}})
+      ? states[entity.entity_id].attributes.friendly_name
+      : '{{ name }}';
+  ]]]
+size: 20px
+styles:
+  icon:
+  - color: var(--card-background-color)
+{%- if domain not in ['script'] %}
+  state:
+    - justify-self: start
+    - align-self: start
+    - font-weight: bolder
+    - font-size: 12px
+    - filter: opacity(40%)
+    - margin-left: 12px
+    - background-image: linear-gradient(to right, white 0%, white 80%, rgba(0,0,0,0))
+    - -webkit-background-clip: text
+    - -webkit-text-fill-color: transparent
+    - width: 100%
+    - text-align: start
+    - text-overflow: unset
+{%- endif %}
+  name:
+{%- if domain not in ['script'] %}
+    - align-self: end
+{%- endif %}
+    - justify-self: start
+    - font-weight: bold
+    - font-size: 14px
+    - margin-left: 12px
+    - filter: opacity(100%)
+    - background-image: linear-gradient(to right, white 0%, white 80%, rgba(0,0,0,0))
+    - -webkit-background-clip: text
+    - -webkit-text-fill-color: transparent
+    - width: 100%
+    - text-align: start
+    - text-overflow: unset
+  img_cell:
+    - background-color: 'var(--paper-item-icon-active-color)'
+    - border-radius: 50%
+    - place-self: center
+    - width: 42px
+    - height: 42px
+  grid:
+{%- if domain not in ['script'] %}
+    - grid-template-areas: '"i n" "i s"'
+    - grid-template-rows: min-content min-content
+{%- else %}
+    - grid-template-areas: '"i n"'
+    - grid-template-rows: min-content
+{%- endif %}
+    - grid-template-columns: min-content auto
+  card:
+  - border-radius: 15px
+  - box-shadow: var(--box-shadow)
+  - padding: 12px
+{%- if domain in ['script'] %}
+tap_action:
+  action: call-service
+  service: {{ entity }}
+{%- else %}
+state:
+  - value: 'on'
+    styles:
+      img_cell:
+      - background-color: 'var(--paper-item-icon-active-color)'
+  - value: 'off'
+    styles:
+      img_cell:
+      - background-color: 'var(--paper-item-icon-color)'
+{%- endif %}

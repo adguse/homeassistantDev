@@ -1,0 +1,17 @@
+var _target = "main"; function initialize() { initializeCommon(); parent.header.setMode("remote"); parent.menu.setMode("remote") }
+function changeSettings(a) {
+    var c = { type: "http_set", packet: [{}] }; c.packet[0].id = parent.header.getId(); var d = _target; switch (a.id) {
+        case "GUI.up": case "GUI.left": case "GUI.enter": case "GUI.right": case "GUI.return": case "GUI.down": case "GUI.optionmenu": case "GUI.home": case "GUI.display": c.packet[0].feature = a.id; c.packet[0].value = "pulse"; break; case "GUI.hdmiout": case "GUI.soundoptimizer": case "GUI.puredirect": case "GUI.inceilingspmode": case "GUI.testpicture": case "GUI.testtone": case "GUI.2chadirect": case "GUI.afd": case "GUI.movie": case "GUI.multistereo": case "GUI.inputmode": if ("main" != _target) return;
+        case "GUI.tunerpreup": case "GUI.tunerpredown": case "GUI.inputup": case "GUI.inputdown": case "GUI.tunerautoup": case "GUI.tunerautodown": case "GUI.bddvd": case "GUI.sat": case "GUI.game": case "GUI.stb": case "GUI.video": case "GUI.aux": case "GUI.tv": case "GUI.sacd": case "GUI.tuner": case "GUI.fm": case "GUI.am": case "GUI.volumeup": case "GUI.volumedown": case "GUI.muting": c.packet[0].feature = a.id; c.packet[0].value = _target; break; case "GUI.power.zone2": case "GUI.power.zone3": case "GUI.power.main": a = a.id.split(".");
+            c.packet[0].feature = a[0] + "." + a[1]; c.packet[0].value = a[2]; d = a[2]; _target = a[2]; break; case "target.zone2": _target = "zone2"; blinkTarget(_target); return; case "target.zone3": _target = "zone3"; blinkTarget(_target); return; case "target.main": _target = "main"; blinkTarget(_target); return; default: console.log("unknown: id: <" + a.id + "> name: <" + a.name + ">"); return
+    }blinkTarget(d); var b = openXMLHttpRequest().xhr; b.onreadystatechange = function () {
+        4 == b.readyState && (503 == b.status ? parent.main.location.href = "unlock.htm" : 518 == b.status ?
+            parent.main.location.href = "unable.htm" : 519 == b.status ? parent.main.location.href = "power.htm" : 200 != b.status && (0 === b.status ? console.log("http status code is 0") : (alert("unknown error: " + b.status), console.log("unknown error: " + b.status))))
+    }; b.send(JSON.stringify(c)); console.log("send: " + JSON.stringify(c))
+} function blinkTarget(a) { var c = document.getElementById("target." + a); c.style.backgroundColor = "#ff3a61"; setTimeout(function () { c.style.backgroundColor = "#808080" }, 400) }
+function loadCurrentSettings(a) {
+    for (var c = { type: "http_get", packet: [] }, d = 0; d < a.length; d++)c.packet[d] = {}, c.packet[d].id = parent.header.getId(), c.packet[d].feature = a[d]; var b = openXMLHttpRequest().xhr; b.onreadystatechange = function () {
+        4 == b.readyState && (503 == b.status ? parent.main.location.href = "unlock.htm" : 518 == b.status ? parent.main.location.href = "unable.htm" : 519 == b.status ? parent.main.location.href = "power.htm" : 200 == b.status ? parseResponse(JSON.parse(b.responseText)) : 0 === b.status ? console.log("http status code is 0") :
+            console.log("unknown error: " + b.status))
+    }; b.send(JSON.stringify(c)); console.log("send: " + JSON.stringify(c))
+} function parseResponse(a) { "http_get_result" == a.type && a.event_available && 0 === (a.event_available[9] & 1) && parent.main && (parent.main.location.href = "unavailable.html") } function onLoad() { initialize(); loadCurrentSettings(["hdmi.4kscaling"]) };

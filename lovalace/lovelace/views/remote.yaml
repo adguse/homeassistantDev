@@ -1,0 +1,423 @@
+# lovelace_gen
+
+#### activies commented out ######
+  # {'entity':'switch.xbox_one', 'color': 'rgba(14, 122, 13)'},
+  # {'entity':'switch.playstation', 'color': 'rgba(102, 92, 190)'},
+  # {'entity':'switch.tv', 'color': 'var(--button-card-light-color)'},
+  # {'entity':'switch.chromecast', 'color': 'rgba(66,133,244)'},
+  # {'entity':'switch.plex', 'color': 'rgba(229, 160, 13)', 'icon': 'fapro:plex'},
+  # {'entity':'switch.peacock', 'color': 'rgba(81, 105, 170)', 'image': '/local/images/peacock.png', 'template': '../templates/remote_image_button.yaml'},
+  # {'entity':'switch.directv', 'color': 'rgba(36,107,196)', 'image': '/local/images/directv.png', 'template': '../templates/remote_image_button.yaml'},
+
+{%- set activity_cols = 4 %}
+{%- set activity_rows = 3 %}
+{%- set activities = [
+  {'entity':'switch.crunchyroll', 'color': 'rgba(244, 117, 31)', 'image': '/local/images/crunchyroll.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.netflix', 'color': 'rgba(216, 31, 38)', 'image': '/local/images/netflix.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.hbo', 'color': 'rgba(255, 255, 255)', 'image': '/local/images/hbo_max.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.hulu', 'color': 'rgba(28, 231, 131)', 'image': '/local/images/hulu.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.prime_video', 'color': 'rgba(0, 168, 225)', 'image': '/local/images/prime_video.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.disney_plus', 'color': 'rgba(8, 213, 238)', 'image': '/local/images/disney_plus.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.youtube_tv', 'color': 'rgba(232,0,0)', 'image': '/local/images/youtube_tv.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.pc', 'color': 'rgba(67,27,106)', 'image': '/local/images/pc.png', 'template': '../templates/remote_image_button.yaml'},
+  {'entity':'switch.game', 'color': 'rgba(48, 208, 107)'},
+  {'entity':'switch.dvd', 'color': 'rgba(202, 208, 48)'},
+  {'entity':'switch.switch', 'color': 'rgba(228, 0, 15)'},
+  {'entity':'switch.directv', 'color': 'rgba(36,107,196)', 'image': '/local/images/directv.png', 'template': '../templates/remote_image_button.yaml'},
+] %}
+
+{%- set controls = [
+  {'entity': 'binary_sensor.remote_living_room_homebutton' },
+  {'entity': 'binary_sensor.remote_living_room_menubutton' },
+  {'entity': 'binary_sensor.remote_living_room_lowerleft' },
+  {'entity': 'binary_sensor.remote_living_room_lowerright' },
+] %}
+
+title: Remote
+path: remote
+icon: mdi:remote-tv
+visible: {{ visible | default(false) }}
+cards:
+- type: vertical-stack
+  cards:
+  - type: horizontal-stack
+    cards:
+    - !include '../templates/buttons/edge.yaml'
+    # - !include
+    #   - '../templates/remote/harmony/navigate.yaml'
+    #   - icon: mdi:arrow-left
+    #     path: home
+    - !include
+      - '../templates/remote/harmony/toggle.yaml'
+      - entity: media_player.sony_bravia_tv
+        color: rgba(228, 94, 101)
+    # - !include
+    #   - '../templates/remote/harmony/toggle.yaml'
+    #   - entity: media_player.sony_bravia_tv
+    #     icon: fapro:power-zone-1
+    #     color: rgba(228, 94, 101)
+    # - !include
+    #   - '../templates/remote/harmony/navigate.yaml'
+    #   - icon: mdi:cog
+    #     path: remote_settings
+    - !include '../templates/buttons/edge.yaml'
+  - type: conditional
+    conditions:
+    - entity: remote.sony_bravia_tv
+      state: 'on'
+    card:
+      type: horizontal-stack
+      cards:
+      - !include '../templates/buttons/edge.yaml'
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:home
+          use_entity: true
+          command: Home
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: media_player.sony_bravia_tv
+          service: media_player.volume_up
+          icon: mdi:volume-plus
+          repeat: 250
+          use_entity: true
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: media_player.sony_bravia_tv
+          service: media_player.volume_down
+          icon: mdi:volume-minus
+          repeat: 250
+          use_entity: true
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:volume-mute
+          use_entity: true
+          command: Mute
+      - !include '../templates/buttons/edge.yaml'
+  - type: conditional
+    conditions:
+    - entity: remote.sony_bravia_tv
+      state: 'on'
+    card:
+      type: horizontal-stack
+      cards:
+      - !include '../templates/buttons/edge.yaml'
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:chevron-left-circle
+          use_entity: true
+          command: Left
+          repeat: 250
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:chevron-up-circle
+          use_entity: true
+          command: Up
+          repeat: 250
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:circle
+          use_entity: true
+          command: DpadCenter
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:chevron-down-circle
+          use_entity: true
+          command: Down
+          repeat: 250
+      - !include
+        - '../templates/remote/harmony/control.yaml'
+        - entity: remote.sony_bravia_tv
+          service: remote.send_command
+          icon: mdi:chevron-right-circle
+          use_entity: true
+          command: Right
+          repeat: 250
+      - !include '../templates/buttons/edge.yaml'
+  {%- for i in range(activity_cols * activity_rows) %}
+  {%- set activity = activities[i] %}
+    {%- if i % activity_cols == 0 %}
+  - type: horizontal-stack
+    cards:
+    - !include '../templates/spacer_edge.yaml'
+    {%- endif %}
+    {% if activity %}
+    - !include
+      {%- if activity.template %}
+      - {{ activity.template }}
+      {%- else %}
+      - '../templates/remote/harmony/toggle.yaml'
+      {%- endif %}
+      {%- if activity.entity is defined %}
+      - entity: {{ activity.entity }}
+        color: {{ activity.color }}
+      {%- elif activity.path is defined %}
+      - path: {{ activity.path }}
+      {%- endif %}
+      {%- if activity.icon is defined %}
+        icon: {{ activity.icon }}
+      {%- endif %}
+      {%- if activity.image is defined %}
+        image: {{ activity.image }}
+      {%- endif %}
+    {%- else %}
+    - !include '../templates/buttons/spacer.yaml'
+    {%- endif %}
+    {%- if i % activity_cols == activity_cols - 1 %}
+    - !include '../templates/spacer_edge.yaml'
+    {%- endif %}
+  {%- endfor %}
+  # - type: conditional
+  #   conditions:
+  #   - entity: remote.sony_bravia_tv
+  #     state: 'on'
+  #   card:
+  #     type: vertical-stack
+  #     cards:
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_back
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_home
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_menu
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_lowerleft
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_lowerright
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/edge.yaml'
+  #     - type: custom:mod-card
+  #       style: |
+  #         :host { margin: 0px; padding: 0px; --ha-card-background: none; box-shadow: none; }
+  #       card:
+  #         type: horizontal-stack
+  #         cards:
+  #         - !include '../templates/buttons/edge.yaml'
+  #         - type: custom:layout-card
+  #           layout_type: custom:grid-layout
+  #           layout:
+  #             grid-template-columns: 20% 80%
+  #             grid-template-rows: auto
+  #             grid-template-areas: |
+  #               "volume directionpad"
+  #           cards:
+  #           - type: vertical-stack
+  #             view_layout:
+  #               grid-area: volume
+  #             cards:
+  #             - !include
+  #               - '../templates/remote/harmony/control.yaml'
+  #               - entity: sensor.active_media_player
+  #                 service: multizone_controller.volume_up
+  #                 icon: mdi:volume-plus
+  #                 use_entity: true
+  #                 repeat: 250
+  #             - !include
+  #               - '../templates/remote/harmony/control.yaml'
+  #               - entity: sensor.active_media_player
+  #                 service: multizone_controller.volume_down
+  #                 icon: mdi:volume-minus
+  #                 use_entity: true
+  #                 repeat: 250
+  #             - !include
+  #               - '../templates/remote/harmony/control.yaml'
+  #               - entity: sensor.active_media_player
+  #                 service: multizone_controller.toggle_volume_mute
+  #                 icon: mdi:volume-mute
+  #                 use_entity: true
+  #             - !include
+  #               - '../templates/remote/harmony/control.yaml'
+  #               - entity: sensor.active_media_player
+  #                 service: multizone_controller.next_zone
+  #                 use_entity: true
+  #           - type: vertical-stack
+  #             view_layout:
+  #               grid-area: directionpad
+  #             cards:
+  #             - type: horizontal-stack
+  #               cards:
+  #               - !include '../templates/buttons/spacer.yaml'
+  #               - !include
+  #                 - '../templates/remote/harmony/control.yaml'
+  #                 - entity: binary_sensor.remote_living_room_directionup
+  #                   service: harmony_helper.send_command
+  #                   use_entity: true
+  #               - !include '../templates/buttons/spacer.yaml'
+  #             - type: horizontal-stack
+  #               cards:
+  #               - !include
+  #                 - '../templates/remote/harmony/control.yaml'
+  #                 - entity: binary_sensor.remote_living_room_directionleft
+  #                   service: harmony_helper.send_command
+  #                   use_entity: true
+  #               - !include
+  #                 - '../templates/remote/harmony/control.yaml'
+  #                 - entity: binary_sensor.remote_living_room_ok
+  #                   service: harmony_helper.send_command
+  #                   use_entity: true
+  #               - !include
+  #                 - '../templates/remote/harmony/control.yaml'
+  #                 - entity: binary_sensor.remote_living_room_directionright
+  #                   service: harmony_helper.send_command
+  #                   use_entity: true
+  #             - type: horizontal-stack
+  #               cards:
+  #               - !include '../templates/buttons/spacer.yaml'
+  #               - !include
+  #                 - '../templates/remote/harmony/control.yaml'
+  #                 - entity: binary_sensor.remote_living_room_directiondown
+  #                   service: harmony_helper.send_command
+  #                   use_entity: true
+  #               - !include '../templates/buttons/spacer.yaml'
+  #         - !include '../templates/buttons/edge.yaml'
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include '../templates/buttons/spacer.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_rewind
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_play
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_pause
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_fastforward
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/edge.yaml'
+  # - type: conditional
+  #   conditions:
+  #   - entity: remote.sony_bravia_tv
+  #     state: 'on'
+  #   card:
+  #     type: vertical-stack
+  #     cards:
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_channelprev
+  #           icon: mdi:chevron-left-circle
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_7
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_8
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_9
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/edge.yaml'
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_channelup
+  #           icon: mdi:chevron-up-circle
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_4
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_5
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_6
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/edge.yaml'
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: script.remote_living_room_channeldown
+  #           icon: mdi:chevron-down-circle
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_1
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_2
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_3
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/edge.yaml'
+  #     - type: horizontal-stack
+  #       cards:
+  #       - !include '../templates/buttons/edge.yaml'
+  #       - !include '../templates/buttons/spacer.yaml'
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: binary_sensor.remote_living_room_0
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include
+  #         - '../templates/remote/harmony/control.yaml'
+  #         - entity: script.remote_living_room_period
+  #           icon: mdi:circle-small
+  #           service: harmony_helper.send_command
+  #           use_entity: true
+  #       - !include '../templates/buttons/spacer.yaml'
+  #       - !include '../templates/buttons/edge.yaml'

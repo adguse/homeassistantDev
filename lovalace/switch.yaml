@@ -1,0 +1,238 @@
+# Template Switches
+
+- platform: template
+  switches:
+
+      # SWITCH
+      switch:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: HMDI 1
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off:
+          service: media_player.select_source
+          data:
+            source: HDMI 1
+          target:
+            entity_id: media_player.sony_bravia_tv
+      
+      # # TV HARMONY ACTIVITY
+      # tv:
+      #   value_template: "{{ is_state_attr('remote.living_room', 'current_activity', 'TV') }}"
+      #   turn_on:
+      #   - service: script.harmony_activity_on
+      #     data:
+      #       activity: TV
+      #   turn_off: *harmony_activity_off
+
+      # # OFF ACTIVITY
+      # poweroff:
+      #   value_template: "{{ not is_state_attr('remote.living_room', 'current_activity', 'PowerOff') }}"
+      #   turn_on: &harmony_all_off
+      #     - service: script.harmony_all_off
+      #   turn_off: *harmony_all_off
+        
+      # # ROKU HARMONY ACTIVITY
+      # roku:
+      #   value_template: "{{ is_state_attr('remote.living_room', 'current_activity', 'Roku') }}"
+      #   turn_on:
+      #   - service: script.harmony_activity_on
+      #     data:
+      #       activity: Roku
+      #   turn_off: *harmony_activity_off
+            
+      # NETFLIX
+      netflix:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: Netflix
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off:
+          service: media_player.select_source
+          data:
+            source: Netflix
+          target:
+            entity_id: media_player.sony_bravia_tv
+        # turn_off: 
+        #   service: remote.send_command
+        #   data:
+        #     command: Home
+        #   target:
+        #     entity_id: remote.sony_bravia_tv
+            
+      # HBO
+      hbo:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: HBO Max
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: HBO Max
+          target:
+            entity_id: media_player.sony_bravia_tv
+            
+      # Hulu
+      hulu:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: Hulu
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: Hulu
+          target:
+            entity_id: media_player.sony_bravia_tv
+            
+      #Prime Video
+      prime_video:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: Prime Video
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: Prime Video
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+            
+      # Disney Plus
+      disney_plus:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: Disney+
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: Disney+
+          target:
+            entity_id: media_player.sony_bravia_tv
+      
+      # Crunchyroll
+      crunchyroll:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: Crunchyroll
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: Crunchyroll
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # Youtube Tv
+      youtube_tv:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: YouTube TV
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: YouTube TV
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # PC
+      pc:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # Directv Stream
+      directv:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # Game port
+      game:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # DVD Player
+      dvd:
+        value_template: "{{ is_state('remote.sony_bravia_tv', 'on') }}"
+        turn_on:
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+        turn_off: 
+          service: media_player.select_source
+          data:
+            source: DIRECTV STREAM
+          target:
+            entity_id: media_player.sony_bravia_tv
+
+      # # Roku Source
+      # roku_source:
+      #   value_template: "{{ is_state_attr('media_player.sony_bravia_tv', 'source', 'hdmi3') }}"
+      #   turn_on: &roku_source
+      #     - service: media_player.select_source
+      #       data:
+      #         entity_id: media_player.sony_bravia_tv
+      #         source: hdmi3
+      #   turn_off: *roku_source

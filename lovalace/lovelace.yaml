@@ -1,0 +1,46 @@
+mode: yaml
+resources:
+# Button Card (Most of the interface)
+
+- url: /hacsfiles/button-card/button-card.js?
+  type: module
+
+# Card Tools
+
+- url: /hacsfiles/lovelace-card-tools/card-tools.js?
+  type: module
+
+# Config Template Card
+
+- url: /hacsfiles/config-template-card/config-template-card.js?
+  type: module
+
+# Text Input Row
+
+- url: /hacsfiles/lovelace-text-input-row/text-input-row.js?
+  type: module
+
+# Mini Graph Card
+
+- url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js?
+  type: module
+
+# Card Mod
+
+- url: /hacsfiles/lovelace-card-mod/card-mod.js?
+  type: module
+
+# Layout Card
+
+- url: /hacsfiles/lovelace-layout-card/layout-card.js
+  type: module
+
+# Plant Card
+
+- url: /local/lovelace-flower-card/flower-card.js?
+  type: module
+
+# lovelace-slider-entity-row
+
+- url: /hacsfiles/lovelace-slider-entity-row/slider-entity-row.js
+  type: module

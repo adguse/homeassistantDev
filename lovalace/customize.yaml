@@ -1,0 +1,53 @@
+switch.disney_plus:
+  friendly_name: Disney Plus
+  icon: fapro:disney-plus
+switch.hbo_now:
+  friendly_name: HBO Now
+  icon: mdi:alpha-h
+switch.hulu:
+  friendly_name: Hulu
+  icon: fapro:hulu
+switch.netflix:
+  friendly_name: Netflix
+  icon: fapro:netflix
+# switch.poweroff:
+#   friendly_name: Power Off
+#   icon: mdi:power
+switch.prime_video:
+  friendly_name: Prime Video
+  icon: fapro:prime-video
+# switch.playstation:
+#   friendly_name: Playstation
+#   icon: mdi:sony-playstation
+# switch.roku:
+#   friendly_name: Roku
+#   icon: mdi:alpha-r
+# switch.roku_source:
+#   friendly_name: Roku Source
+#   icon: mdi:alpha-r
+switch.switch:
+  friendly_name: Switch
+  icon: mdi:nintendo-switch
+# switch.tv:
+#   friendly_name: TV
+#   icon: mdi:television-box
+# switch.xbox_one:
+#   friendly_name: Xbox One
+#   icon: mdi:microsoft-xbox
+media_player.sony_bravia_tv:
+  friendly_name: TV
+  icon: mdi:power
+switch.chromecast:
+  icon: mdi:cast
+switch.chromecast_source:
+  icon: mdi:cast
+switch.hbo:
+  icon: fapro:hbo
+switch.pc:
+  icon: has:desktop
+switch.game:
+  friendly_name: Game Port
+  icon: mdi:gamepad-variant
+switch.dvd:
+  friendly_name: DVD Player
+  icon: fas:compact-disc
